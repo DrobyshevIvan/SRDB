@@ -1,0 +1,12 @@
+D:\Study\3_1\СРБД\LAB3\SRDB\Backend\MedShop\Domain\bin\Debug\net9.0\Domain.deps.json
+D:\Study\3_1\СРБД\LAB3\SRDB\Backend\MedShop\Domain\bin\Debug\net9.0\Domain.dll
+D:\Study\3_1\СРБД\LAB3\SRDB\Backend\MedShop\Domain\bin\Debug\net9.0\Domain.pdb
+D:\Study\3_1\СРБД\LAB3\SRDB\Backend\MedShop\Domain\obj\Debug\net9.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\Study\3_1\СРБД\LAB3\SRDB\Backend\MedShop\Domain\obj\Debug\net9.0\Domain.AssemblyInfoInputs.cache
+D:\Study\3_1\СРБД\LAB3\SRDB\Backend\MedShop\Domain\obj\Debug\net9.0\Domain.AssemblyInfo.cs
+D:\Study\3_1\СРБД\LAB3\SRDB\Backend\MedShop\Domain\obj\Debug\net9.0\Domain.csproj.CoreCompileInputs.cache
+D:\Study\3_1\СРБД\LAB3\SRDB\Backend\MedShop\Domain\obj\Debug\net9.0\Domain.sourcelink.json
+D:\Study\3_1\СРБД\LAB3\SRDB\Backend\MedShop\Domain\obj\Debug\net9.0\Domain.dll
+D:\Study\3_1\СРБД\LAB3\SRDB\Backend\MedShop\Domain\obj\Debug\net9.0\refint\Domain.dll
+D:\Study\3_1\СРБД\LAB3\SRDB\Backend\MedShop\Domain\obj\Debug\net9.0\Domain.pdb
+D:\Study\3_1\СРБД\LAB3\SRDB\Backend\MedShop\Domain\obj\Debug\net9.0\ref\Domain.dll

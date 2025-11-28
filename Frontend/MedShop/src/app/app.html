@@ -1,0 +1,299 @@
+<div class="app-shell">
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-mark">MedShop</span>
+    </div>
+  </header>
+
+  <nav class="tab-bar">
+    @for (tab of tabs; track tab.key) {
+      <button
+        type="button"
+        class="tab-btn"
+        [class.is-active]="activeTab() === tab.key"
+        (click)="selectTab(tab.key)"
+      >
+        <span class="tab-label">{{ tab.label }}</span>
+        <span class="tab-subtitle">{{ tab.subtitle }}</span>
+      </button>
+    }
+  </nav>
+
+  <section class="tab-view">
+    @switch (activeTab()) {
+      @case ('products') {
+        <div class="products-view">
+          <div class="products-list">
+            @if (productsLoading()) {
+              <div class="empty-state">
+                <p>Завантажуємо товари...</p>
+              </div>
+            } @else if (productsError(); as error) {
+              <div class="empty-state">
+                <p>{{ error }}</p>
+                <button class="primary ghost" type="button" (click)="refreshProducts()">
+                  Спробувати знову
+                </button>
+              </div>
+            } @else if (products().length === 0) {
+              <div class="empty-state">
+                <p>Каталог порожній.</p>
+              </div>
+            } @else {
+              @for (product of products(); track product.id) {
+                <article
+                  class="product-card"
+                  [class.is-selected]="product.id === selectedProductId()"
+                  (click)="selectProduct(product.id)"
+                >
+                  <header>
+                    <div>
+                      <h3>{{ product.name }}</h3>
+                      <p class="product-meta">{{ product.category?.name }} · ID {{ product.id }}</p>
+                    </div>
+                    <span class="product-price">{{ product.price | number }} ₴</span>
+                  </header>
+                  <p class="product-description">
+                    {{ product.description || 'Опис відсутній' }}
+                  </p>
+                  <footer>
+                    <span class="badge">
+                      Склад: {{ product.quantity }}
+                    </span>
+                    <span class="badge badge-muted">
+                      Категорія: {{ product.category?.name }}
+                    </span>
+                  </footer>
+                </article>
+              }
+            }
+          </div>
+          <aside class="product-details">
+            @if (selectedProductLoading()) {
+              <div class="empty-state">
+                <p>Завантажуємо деталі товару...</p>
+              </div>
+            } @else if (selectedProductError(); as error) {
+              <div class="empty-state">
+                <p>{{ error }}</p>
+              </div>
+            } @else if (selectedProduct(); as product) {
+              <div class="product-details__content">
+                <h4>{{ product.name }}</h4>
+                <p class="product-details__category">{{ product.category?.name }}</p>
+                <dl>
+                  <div>
+                    <dt>Вартість</dt>
+                    <dd>{{ product.price | number }} ₴</dd>
+                  </div>
+                  <div>
+                    <dt>На складі</dt>
+                    <dd>{{ product.quantity }} од.</dd>
+                  </div>
+                </dl>
+                <p class="product-details__text">
+                  {{ product.description || 'Опис для цього товару ще не задано.' }}
+                </p>
+
+                <h5>Історія продажів</h5>
+                @if (product.orderItems.length > 0) {
+                  <ul class="orders-list">
+                    @for (item of product.orderItems; track item.id) {
+                      <li>
+                        <strong>#{{ item.order.id }}</strong>
+                        <span>{{ item.order.orderDate | date: 'dd.MM.yyyy' }}</span>
+                        <span>{{ item.order.totalAmount | number }} ₴</span>
+                        <span class="badge badge-status">{{ item.order.status }}</span>
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <div class="empty-state">
+                    <p>Ще не було оформлених продажів для цього товару.</p>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="empty-state">
+                <p>Оберіть товар ліворуч, щоб побачити деталі та продажі.</p>
+              </div>
+            }
+          </aside>
+        </div>
+      }
+
+      @case ('procedure') {
+        <app-procedures-tab></app-procedures-tab>
+      }
+
+      @case ('functions') {
+        <section class="functions-grid">
+          <article class="panel">
+            <h4>COUNT_ORDERS (скалярна)</h4>
+            <p>Повертає кількість замовлень із сумою менше вказаного значення.</p>
+            <label>
+              <span>Максимальна сума</span>
+              <input
+                type="number"
+                min="0"
+                [value]="scalarFunctionPayload().maxAmount"
+                (input)="updateScalarFunctionPayload($any($event.target).valueAsNumber)"
+              />
+            </label>
+            <div class="function-actions">
+              <button
+                class="primary"
+                type="button"
+                [disabled]="scalarFunctionLoading()"
+                (click)="executeScalarFunction()"
+              >
+                @if (scalarFunctionLoading()) {
+                  Виконуємо...
+                } @else {
+                  Запустити функцію
+                }
+              </button>
+              <span class="hint">Запит: <code>d b o . C O U N T _ O R D E R S</code></span>
+            </div>
+            <div class="placeholder-box">
+              @if (scalarFunctionLoading()) {
+                Обробка...
+              } @else if (scalarFunctionError(); as error) {
+                <span class="error-text">{{ error }}</span>
+              } @else if (scalarFunctionResult() !== null) {
+                <span>Результат: <strong>{{ scalarFunctionResult() }}</strong> записів</span>
+              } @else {
+                <span>Натисніть кнопку, щоб отримати результат.</span>
+              }
+            </div>
+          </article>
+
+          <article class="panel">
+            <h4>GetUsersWithExpensiveProductsInCategory (таблична)</h4>
+            <p>Віддає користувачів, які купували дорогі товари у вибраній категорії.</p>
+            <div class="form-grid">
+              <label>
+                <span>Мінімальна ціна</span>
+                <input
+                  type="number"
+                  min="0"
+                  [value]="tableFunctionPayload().minPrice"
+                  (input)="updateTableFunctionPayload('minPrice', $any($event.target).valueAsNumber)"
+                />
+              </label>
+              <label>
+                <span>CategoryId</span>
+                <input
+                  type="number"
+                  min="0"
+                  [value]="tableFunctionPayload().categoryId"
+                  (input)="updateTableFunctionPayload('categoryId', $any($event.target).valueAsNumber)"
+                />
+              </label>
+            </div>
+            <div class="function-actions">
+              <button
+                class="primary"
+                type="button"
+                [disabled]="tableFunctionLoading()"
+                (click)="executeTableFunction()"
+              >
+                @if (tableFunctionLoading()) {
+                  Виконуємо...
+                } @else {
+                  Отримати користувачів
+                }
+              </button>
+            </div>
+            @if (tableFunctionLoading()) {
+              <div class="placeholder-box">Завантаження...</div>
+            } @else if (tableFunctionError(); as error) {
+              <div class="placeholder-box"><span class="error-text">{{ error }}</span></div>
+            } @else if (tableFunctionResult().length === 0) {
+              <div class="placeholder-box">Користувачів за заданими критеріями не знайдено.</div>
+            } @else {
+              <div class="placeholder-box table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>UserId</th>
+                      <th>UserName</th>
+                      <th>FullName</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (user of tableFunctionResult(); track user.userId) {
+                      <tr>
+                        <td>{{ user.userId }}</td>
+                        <td>{{ user.userName }}</td>
+                        <td>{{ user.fullName || '—' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </article>
+        </section>
+      }
+
+      @case ('triggers') {
+        <section class="panel trigger-panel">
+          <header>
+            <h3>Тест виключень тригеру</h3>
+            <p>Використаємо створення замовлення, щоб зловити RAISERROR у дні, коли це заборонено.</p>
+          </header>
+          <form class="form-grid">
+            <label>
+              <span>UserId</span>
+              <input
+                type="number"
+                placeholder="Наприклад, 5"
+                [value]="triggerTestPayload().userId"
+                (input)="updateTriggerPayload('userId', $any($event.target).value)"
+              />
+            </label>
+            <label>
+              <span>Дата замовлення</span>
+              <input
+                type="date"
+                [value]="triggerTestPayload().orderDate"
+                (input)="updateTriggerPayload('orderDate', $any($event.target).value)"
+              />
+            </label>
+          </form>
+          <button
+            class="primary"
+            type="button"
+            [disabled]="triggerWaiting()"
+            (click)="simulateTriggerRequest()"
+          >
+            @if (triggerWaiting()) {
+              Надсилаємо...
+            } @else {
+              Створити замовлення
+            }
+          </button>
+          @if (triggerMessage(); as message) {
+            <div class="notice" [class.notice-error]="message.type === 'error'">
+              {{ message.text }}
+            </div>
+          }
+          <div class="log">
+            <h5>Лог повідомлень:</h5>
+            @for (entry of triggerLog(); track entry) {
+              <div class="log-entry">{{ entry }}</div>
+        }
+      </div>
+        </section>
+      }
+
+      @default {
+        <div class="empty-state">
+          <p>Оберіть вкладку, щоб побачити дані.</p>
+      </div>
+      }
+    }
+  </section>
+  </div>
+
